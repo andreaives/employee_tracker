@@ -1,22 +1,22 @@
 //require in inquirer & MySQl
 const inquirer = require("inquirer");
-// var mysql = require("mysql");
+var mysql = require("mysql");
 
-// //create Mysql connection
-// var connection = mysql.createConnection({
-//   host: "localhost",
-//   port: 3306,
-//   user: "root",
-//   password: "abcd1234",
-//   database: "workforce_db"
-// });
+//create Mysql connection
+var connection = mysql.createConnection({
+  host: "localhost",
+  port: 3306,
+  user: "root",
+  password: "abcd1234",
+  database: "workforce_db"
+});
 
-// //once connected to Mysql the start questions function
-// connection.connect(function(err) {
-//   if (err) throw err;
-//   console.log("connected as id " + connection.threadId + "\n");
-//   startQuestions();
-// });
+//once connected to Mysql the start questions function
+connection.connect(function(err) {
+  if (err) throw err;
+  console.log("connected as id " + connection.threadId + "\n");
+  startQuestions();
+});
 
 //build out inquirer with questions
 // will need to have access to the data { choice }
@@ -33,9 +33,7 @@ startQuestions = () => {
   ] 
 }).then(function(data){
 
-// if (data.action === "Add a department."){
-//  console.log("Success!")
-// }else if(data)
+ //need to send user different responses for choices.
 switch (data.action) {
  case "Add a department.":
   console.log("Success!")
@@ -50,7 +48,7 @@ switch (data.action) {
   console.log("Success!")
  break;
  case "View roles":
-  console.log("Success!")
+  viewRoles()
  break;
  case "View employees":
   console.log("Success!")
@@ -60,12 +58,40 @@ switch (data.action) {
  break;
 }
 
-
-
 })
 .catch(console.error)
 
 }
+function addDepartment(){
+
+}
+
+function addRole() {
+
+}
+function addEmployee() {
+
+}
+//can probably make all 3 a dynamic function
+function viewDepartmetn(){
+
+}
+function viewRoles(){
+connection.query("SELECT * FROM roles", function (err, results){
+if (err) throw err;
+console.table(results)
+})
+}
+function viewEmployees(){
+
+}
+function updateEmployees(){
+
+}
+
+
+
+
 
 startQuestions();
 
