@@ -18,21 +18,32 @@ figlet('EMPLOYEE-MANAGER', function (err, data) {
     console.dir(err);
     return;
   }
-  console.log("\n============================")
+  console.log("\n============================================")
   console.log(data)
-  console.log("\n============================\n\n\n\n\n\n")
+  displayEmployees();
 });
 
 //once connected to Mysql the start questions function
 connection.connect(function (err) {
   if (err) throw err;
-  console.log("connected as id " + connection.threadId + "\n");
-  startQuestions();
+  
 });
+
+displayEmployees = () => {  
+  connection.query("SELECT employees.first_name, employees.last_name, roles.title, departments.name, roles.salary FROM employees LEFT JOIN roles ON employees.role_id = roles.id LEFT JOIN departments ON employees.department_id = departments.id ", function (err, res) {
+    if (err) throw err;
+    console.log("\n============================================")
+    console.table(res)
+    console.log("============================================\n\n")
+    startQuestions();
+  })
+  
+}
 
 //build out inquirer with questions
 // will need to have access to the data { choice }
 startQuestions = () => {
+  
   inquirer.prompt({
 
     type: 'list',
@@ -41,14 +52,14 @@ startQuestions = () => {
     choices: [
       "Add a department.", "Add a role.", "Add an employee.",
       "View all departments", "View all roles", "View all employees",
-      "Update employees roles."
+      "Update employees roles.", "EXIT"
     ]
   }).then(function (data) {
 
     //need to send user different responses for choices.
     switch (data.action) {
       case "Add a department.":
-        console.log("Success!")
+        addDepartment()
         break;
       case "Add a role.":
         console.log("Success!")
@@ -68,6 +79,9 @@ startQuestions = () => {
       case "Update employees roles.":
         console.log("Success!")
         break;
+      case 'EXIT':
+        exitManager()
+        break;
     }
 
   })
@@ -75,11 +89,34 @@ startQuestions = () => {
 
 }
 addDepartment = () => {
-
+  connection.query(
+    "SELECT * FROM roles", (function (err, result) {
+      if (err) throw err
+inquirer.prompt([
+  {
+    name: 'newDepartment',
+    message: 'What department would you like to add?'
+  }
+]).then(function(answer) {
+  console.log(answer)
+  connection.query(
+    "INSERT INTO departments SET ?",
+    {
+      id : result.id,
+      name: answer.newDepartment
+    },
+  
+  )
+  startQuestions();
+})
+})
+)
 }
+
 
 addRole = () => {
   //grab all departments and ask what department it goes into
+  
 }
 addEmployee = () => {
   connection.query(
@@ -101,23 +138,16 @@ addEmployee = () => {
           choices: () => {
             var choiceArray = [];
             for (var i = 0; i < result.length; i++) {
-              choiceArray.push(result[i].title)
+              choiceArray.push(result[i].title && result[i].id)
+              
             }
             return choiceArray;
           }
         }
     ]).then(function (res) {
-      let getRoleId;
-
       console.log(res)
       
-      //array.find
-      // var query = connection.query(
-      //  "INSERT INTO employees SET ?", {
-      //   first_name : { first_name },
-      //   last_name : { last_name }
-
-      //  })
+    
 
     })
   }) 
@@ -125,31 +155,40 @@ addEmployee = () => {
 }
 //calling department table
 viewDepartment = () => {
-  connection.query("SELECT * FROM departments", (err, results) => {
+  connection.query("SELECT * FROM roles RIGHT JOIN departments ON roles.department_id= departments.id", (err, results) => {
     if (err) throw err;
     console.table(results)
-  })
+    startQuestions();
+  
+  }) 
 }
+
+
 //calling roles table
 viewRoles = () => {
-  connection.query("SELECT * FROM roles", function (err, res) {
+  connection.query("SELECT departments.name, roles.title, roles.salary FROM roles LEFT JOIN departments ON roles.department_id= departments.id", (err, res) => {
     if (err) throw err;
     console.table(res)
+    startQuestions();
   })
+
 }
 //Iwould like to call the join function that I have in my seed.sql 
 // in meantime just calling employee function
 viewEmployees = () => {
-  connection.query("SELECT * FROM ", function (err, res) {
+  connection.query("SELECT employees.first_name, employees.last_name, roles.title, departments.name, roles.salary FROM employees LEFT JOIN roles ON employees.role_id = roles.id LEFT JOIN departments ON employees.department_id = departments.id ", function (err, res) {
     if (err) throw err;
     console.table(res)
+    startQuestions();
   })
 }
 updateEmployees = () => {
 
 }
 
-
+exitManager = () => {
+  console.log('Have a great day (: ')
+}
 
 //add departments, roles, employees
 //view departments, roles, employees
