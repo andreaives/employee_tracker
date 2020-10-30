@@ -62,7 +62,7 @@ startQuestions = () => {
         addDepartment()
         break;
       case "Add a role.":
-        console.log("Success!")
+        addRole();
         break;
       case "Add an employee.":
         addEmployee();
@@ -115,9 +115,41 @@ inquirer.prompt([
 
 
 addRole = () => {
-  //grab all departments and ask what department it goes into
+  connection.query(
+    "SELECT * FROM roles", (function (err, result) {
+      if (err) throw err
+inquirer.prompt([
+  {
+    name: 'newTitle',
+    message: 'What role would you like to add??'
+  },
+  {
+    name: 'newSalary',
+    message: 'What is the salary paid to this role?'
+  },
+  {
+    name: 'departmentID',
+    message: 'What is the department id? Please refer to the table above if needed.'
+  }
+]).then(function(answer) {
+  console.log(answer)
+  let newSalary = parseInt(answer.newSalary)
+  let departmentID = parseInt(answer.departmentID)
+  connection.query(
+    "INSERT INTO roles SET ?",
+    {
+      title: answer.newDepartment,
+      salary: newSalary,
+      department_id: departmentID
+    }
   
+  )
+  startQuestions();
+})
+})
+)
 }
+
 addEmployee = () => {
   connection.query(
     "SELECT * FROM roles", (function (err, result) {
