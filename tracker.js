@@ -138,11 +138,10 @@ inquirer.prompt([
   connection.query(
     "INSERT INTO roles SET ?",
     {
-      title: answer.newDepartment,
+      title: answer.newTitle,
       salary: newSalary,
       department_id: departmentID
     }
-  
   )
   startQuestions();
 })
