@@ -26,10 +26,10 @@ figlet('EMPLOYEE-MANAGER', function (err, data) {
 //once connected to Mysql the start questions function
 connection.connect(function (err) {
   if (err) throw err;
-  
+
 });
 
-displayEmployees = () => {  
+displayEmployees = () => {
   connection.query("SELECT employees.first_name, employees.last_name, roles.title, departments.name, roles.salary FROM employees LEFT JOIN roles ON employees.role_id = roles.id LEFT JOIN departments ON employees.department_id = departments.id ", function (err, res) {
     if (err) throw err;
     console.log("\n============================================")
@@ -37,13 +37,13 @@ displayEmployees = () => {
     console.log("============================================\n\n")
     startQuestions();
   })
-  
+
 }
 
 //build out inquirer with questions
 // will need to have access to the data { choice }
 startQuestions = () => {
-  
+
   inquirer.prompt({
 
     type: 'list',
@@ -92,25 +92,25 @@ addDepartment = () => {
   connection.query(
     "SELECT * FROM roles", (function (err, result) {
       if (err) throw err
-inquirer.prompt([
-  {
-    name: 'newDepartment',
-    message: 'What department would you like to add?'
-  }
-]).then(function(answer) {
-  console.log(answer)
-  connection.query(
-    "INSERT INTO departments SET ?",
-    {
-      id : result.id,
-      name: answer.newDepartment
-    },
-  
+      inquirer.prompt([
+        {
+          name: 'newDepartment',
+          message: 'What department would you like to add?'
+        }
+      ]).then(function (answer) {
+        console.log(answer)
+        connection.query(
+          "INSERT INTO departments SET ?",
+          {
+            id: result.id,
+            name: answer.newDepartment
+          },
+
+        )
+        startQuestions();
+      })
+    })
   )
-  startQuestions();
-})
-})
-)
 }
 
 
@@ -118,35 +118,35 @@ addRole = () => {
   connection.query(
     "SELECT * FROM roles", (function (err, result) {
       if (err) throw err
-inquirer.prompt([
-  {
-    name: 'newTitle',
-    message: 'What role would you like to add??'
-  },
-  {
-    name: 'newSalary',
-    message: 'What is the salary paid to this role?'
-  },
-  {
-    name: 'departmentID',
-    message: 'What is the department id? Please refer to the table above if needed.'
-  }
-]).then(function(answer) {
-  console.log(answer)
-  let newSalary = parseInt(answer.newSalary)
-  let departmentID = parseInt(answer.departmentID)
-  connection.query(
-    "INSERT INTO roles SET ?",
-    {
-      title: answer.newTitle,
-      salary: newSalary,
-      department_id: departmentID
-    }
+      inquirer.prompt([
+        {
+          name: 'newTitle',
+          message: 'What role would you like to add??'
+        },
+        {
+          name: 'newSalary',
+          message: 'What is the salary paid to this role?'
+        },
+        {
+          name: 'departmentID',
+          message: 'What is the department id? Please refer to the table above if needed.'
+        }
+      ]).then(function (answer) {
+        console.log(answer)
+        let newSalary = parseInt(answer.newSalary)
+        let departmentID = parseInt(answer.departmentID)
+        connection.query(
+          "INSERT INTO roles SET ?",
+          {
+            title: answer.newTitle,
+            salary: newSalary,
+            department_id: departmentID
+          }
+        )
+        startQuestions();
+      })
+    })
   )
-  startQuestions();
-})
-})
-)
 }
 
 addEmployee = () => {
@@ -156,32 +156,40 @@ addEmployee = () => {
       // query to get all roles
       inquirer.prompt([
         {
-          name: 'first_name',
+          name: 'firstName',
           message: 'What is the employees first name?'
         }, {
-          name: 'last_name',
+          name: 'lastName',
           message: 'What is the employees last name?'
         }, {
           type: 'list',
-          name: 'role',
-          message: 'What is the employees role?',
-          //grab each role and array then present that as the choices
+          name: 'roleID',
+          message: 'What is the employees role id?',
           choices: () => {
             var choiceArray = [];
             for (var i = 0; i < result.length; i++) {
-              choiceArray.push(result[i].title && result[i].id)
-              
+              choiceArray.push(result[i].id)
+
             }
             return choiceArray;
           }
         }
-    ]).then(function (res) {
-      console.log(res)
-      
-    
+      ]).then(function (answer) {
+        let roleId = parseInt(answer.roleId)
+        connection.query(
+          "INSERT INTO employees SET ?",
+          {
+            first_name: answer.newTitle,
+            last_name: answer.lastName,
+            role_id: roleId
+          }
+        )
+        console.log(res)
+        startQuestions();
 
+
+      })
     })
-  }) 
   )
 }
 //calling department table
@@ -190,8 +198,8 @@ viewDepartment = () => {
     if (err) throw err;
     console.table(results)
     startQuestions();
-  
-  }) 
+
+  })
 }
 
 
